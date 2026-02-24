@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harsh Sahu — Career Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --water:        #aad3df;
+  --water-dk:     #7ab8cc;
+  --land:         #f5f0e8;
+  --land-2:       #eae6db;
+  --park:         #c8e6c0;
+  --park-dk:      #a5d6a7;
+  --road-major:   #ffffff;
+  --road-mid:     #f8f4ee;
+  --road-minor:   #fafafa;
+  --road-stroke:  #e0d8c8;
+  --building:     #e8e0d0;
+  --building-dk:  #d8cfc0;
+  --district-bg:  #ede8de;
+  --text-primary: #3c4043;
+  --text-sec:     #70757a;
+  --text-water:   #5d8598;
+  --accent:       #1a73e8;
+  --accent-lt:    #4285f4;
+  --red:          #ea4335;
+  --orange:       #fa7b17;
+  --green:        #34a853;
+  --yellow:       #fbbc04;
+  --purple:       #9c27b0;
+  --teal:         #009688;
+  --ui-bg:        #fff;
+  --ui-border:    rgba(0,0,0,0.12);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.14);
+  --shadow-md:    0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+  --shadow-lg:    0 8px 24px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1);
+  --shadow-xl:    0 16px 48px rgba(0,0,0,0.18), 0 8px 16px rgba(0,0,0,0.12);
+}
+
+html, body {
+  width:100vw; height:100vh; overflow:hidden;
+  font-family:'Roboto',sans-serif; font-size:14px;
+  background:#aad3df;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── MAP CANVAS ── */
+#mapCanvas {
+  position:absolute; top:0; left:0;
+  cursor:grab; display:block;
+}
+#mapCanvas.dragging { cursor:grabbing; }
+
+/* ── SEARCH BAR (top) ── */
+#searchBar {
+  position:absolute; top:16px; left:50%; transform:translateX(-50%);
+  z-index:50;
+  background:#fff;
+  border-radius:24px;
+  box-shadow: var(--shadow-lg);
+  display:flex; align-items:center;
+  padding:0 20px 0 16px;
+  height:48px; gap:10px;
+  min-width:340px;
+  border:1px solid rgba(0,0,0,0.06);
+  pointer-events:none;
+}
+.search-icon { color:#4285f4; font-size:20px; flex-shrink:0; }
+.search-text {
+  font-family:'Google Sans',sans-serif;
+  font-size:1rem; color:#3c4043; font-weight:500;
+  white-space:nowrap;
+}
+.search-divider { width:1px; height:24px; background:rgba(0,0,0,0.12); }
+.search-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg,#1a73e8,#34a853);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:0.85rem;
+  font-family:'Google Sans',sans-serif;
+  flex-shrink:0;
+}
+
+/* ── LEFT PANEL (card) ── */
+#leftPanel {
+  position:absolute; top:80px; left:16px;
+  z-index:40;
+  width:380px;
+  max-height: calc(100vh - 112px);
+  background:#fff;
+  border-radius:12px;
+  box-shadow: var(--shadow-xl);
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  animation: cardIn 0.28s cubic-bezier(.2,.8,.4,1) both;
+  border:1px solid rgba(0,0,0,0.06);
+}
+#leftPanel.open { display:flex; }
+
+@keyframes cardIn {
+  from { opacity:0; transform:translateX(-12px) scale(0.98); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
+}
+
+/* Card header */
+#cardHeader {
+  position:relative; flex-shrink:0;
+  padding:20px 20px 16px;
+  border-bottom:1px solid rgba(0,0,0,0.08);
+}
+#cardColorBar {
+  position:absolute; top:0; left:0; right:0; height:4px;
+  border-radius:12px 12px 0 0;
+}
+#cardEmoji { font-size:2.2rem; margin-bottom:6px; display:block; line-height:1; }
+#cardTitle {
+  font-family:'Google Sans',sans-serif;
+  font-size:1.3rem; font-weight:700; color:#202124;
+  margin-bottom:3px; line-height:1.2;
+}
+#cardMeta {
+  font-size:0.82rem; color:var(--text-sec);
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+}
+.meta-chip {
+  background:#f1f3f4; border-radius:12px;
+  padding:2px 10px; font-size:0.75rem; color:#3c4043;
+  font-weight:500; white-space:nowrap;
+}
+#cardClose {
+  position:absolute; top:14px; right:14px;
+  width:32px; height:32px; border-radius:50%;
+  background:none; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-sec); font-size:1.1rem;
+  transition:background 0.15s;
+}
+#cardClose:hover { background:#f1f3f4; }
+
+/* Action buttons row */
+#cardActions {
+  display:flex; gap:8px; padding:10px 20px 14px;
+  border-bottom:1px solid rgba(0,0,0,0.08);
+  flex-shrink:0;
+}
+.action-btn {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:4px; padding:8px 4px; border-radius:8px;
+  background:#f1f3f4; border:none; cursor:default;
+  font-family:'Roboto',sans-serif;
+}
+.action-btn .btn-icon { font-size:1.1rem; }
+.action-btn .btn-label { font-size:0.7rem; color:#1a73e8; font-weight:500; }
+
+/* Card body */
+#cardBody {
+  overflow-y:auto; flex:1; padding:16px 20px 20px;
+}
+#cardBody::-webkit-scrollbar { width:4px; }
+#cardBody::-webkit-scrollbar-track { background:transparent; }
+#cardBody::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.15); border-radius:2px; }
+
+/* Content sections */
+.info-section { margin-bottom:18px; }
+.info-section:last-child { margin-bottom:0; }
+.section-head {
+  font-size:0.78rem; font-weight:600; color:#1a73e8;
+  letter-spacing:0.8px; text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex; align-items:center; gap:6px;
+}
+.section-head::after { content:''; flex:1; height:1px; background:rgba(26,115,232,0.15); }
+
+.exp-row {
+  display:flex; gap:12px; padding:10px;
+  border-radius:8px; margin-bottom:6px;
+  border:1px solid rgba(0,0,0,0.06);
+  background:#fafafa;
+  transition:background 0.15s;
+}
+.exp-row:last-child { margin-bottom:0; }
+.exp-logo {
+  width:36px; height:36px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; flex-shrink:0;
+}
+.exp-info { flex:1; min-width:0; }
+.exp-company { font-size:0.88rem; font-weight:600; color:#202124; }
+.exp-role { font-size:0.8rem; color:var(--text-sec); margin:1px 0; }
+.exp-date { font-size:0.75rem; color:#1a73e8; font-weight:500; }
+.exp-bullets { margin-top:6px; }
+.exp-bullets li {
+  font-size:0.82rem; color:#3c4043; line-height:1.55;
+  margin-left:14px; margin-bottom:3px;
+}
+
+.tag-wrap { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.gtag {
+  font-size:0.72rem; padding:3px 10px; border-radius:12px;
+  font-weight:500; white-space:nowrap;
+}
+.gtag-blue   { background:#e8f0fe; color:#1a73e8; }
+.gtag-green  { background:#e6f4ea; color:#137333; }
+.gtag-red    { background:#fce8e6; color:#c5221f; }
+.gtag-orange { background:#fef3e2; color:#b06000; }
+.gtag-purple { background:#f3e8fd; color:#7b1fa2; }
+.gtag-teal   { background:#e6f4f1; color:#00695c; }
+.gtag-grey   { background:#f1f3f4; color:#3c4043; }
+
+.stat-row { display:flex; gap:8px; margin:10px 0; }
+.stat-card {
+  flex:1; padding:10px 8px; border-radius:8px;
+  background:#f8f9fa; text-align:center;
+  border:1px solid rgba(0,0,0,0.06);
+}
+.stat-val { font-family:'Google Sans',sans-serif; font-size:1.4rem; font-weight:700; color:#202124; }
+.stat-lbl { font-size:0.68rem; color:var(--text-sec); margin-top:2px; font-weight:500; text-transform:uppercase; letter-spacing:0.5px; }
+
+.lang-row { display:flex; align-items:center; gap:10px; margin:6px 0; }
+.lang-name { font-size:0.85rem; color:#3c4043; width:55px; flex-shrink:0; }
+.lang-bar { flex:1; height:4px; background:#f1f3f4; border-radius:2px; overflow:hidden; }
+.lang-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#1a73e8,#4285f4); }
+
+.hobby-row { display:flex; flex-wrap:wrap; gap:6px; }
+.h-chip {
+  display:flex; align-items:center; gap:5px;
+  background:#f1f3f4; border-radius:16px;
+  padding:5px 12px; font-size:0.78rem; color:#3c4043;
+}
+
+.proj-item {
+  display:flex; gap:12px; padding:8px 10px;
+  border-radius:8px; margin-bottom:6px;
+  border:1px solid rgba(0,0,0,0.06);
+}
+.proj-item:last-child { margin-bottom:0; }
+.proj-icon { font-size:1.4rem; flex-shrink:0; }
+.proj-name { font-size:0.85rem; font-weight:600; color:#202124; }
+.proj-co { font-size:0.75rem; color:var(--text-sec); margin:1px 0 3px; }
+.proj-desc { font-size:0.78rem; color:#3c4043; line-height:1.45; }
+
+.rating-row {
+  display:flex; align-items:center; gap:6px;
+  margin:6px 0;
+  font-size:0.82rem; color:#3c4043;
+}
+.stars { color:#fbbc04; letter-spacing:-1px; }
+
+/* ── ZOOM CONTROLS ── */
+#zoomCtrl {
+  position:absolute; bottom:120px; right:16px; z-index:40;
+  background:#fff; border-radius:8px;
+  box-shadow:var(--shadow-md);
+  border:1px solid rgba(0,0,0,0.08);
+  overflow:hidden;
+}
+.zoom-btn {
+  width:40px; height:40px; display:flex;
+  align-items:center; justify-content:center;
+  background:none; border:none; cursor:pointer;
+  font-size:1.3rem; color:#3c4043;
+  transition:background 0.15s;
+}
+.zoom-btn:hover { background:#f1f3f4; }
+.zoom-btn:first-child { border-bottom:1px solid rgba(0,0,0,0.08); }
+
+/* ── SCALE BAR ── */
+#scaleBar {
+  position:absolute; bottom:24px; right:70px; z-index:40;
+  pointer-events:none;
+}
+.scale-line {
+  height:3px; background:#3c4043;
+  border-left:2px solid #3c4043;
+  border-right:2px solid #3c4043;
+  margin-bottom:2px;
+  width:80px;
+}
+.scale-text { font-size:0.65rem; color:#3c4043; text-align:right; font-weight:500; }
+
+/* ── LAYER TOGGLE ── */
+#layerBtn {
+  position:absolute; bottom:24px; right:16px; z-index:40;
+  width:40px; height:40px; border-radius:8px;
+  background:#fff; border:1px solid rgba(0,0,0,0.08);
+  box-shadow:var(--shadow-sm); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; color:var(--text-sec);
+  transition:background 0.15s;
+}
+#layerBtn:hover { background:#f1f3f4; }
+
+/* ── MINI MAP ── */
+#miniMap {
+  position:absolute; bottom:70px; right:16px; z-index:40;
+  width:120px; height:90px; border-radius:8px;
+  overflow:hidden; border:2px solid #fff;
+  box-shadow:var(--shadow-md);
+}
+#miniMapCanvas { display:block; }
+
+/* ── BOTTOM LEGEND ── */
+#bottomBar {
+  position:absolute; bottom:16px; left:16px; z-index:40;
+  display:flex; gap:8px; align-items:center;
+}
+.legend-pill {
+  background:#fff; border-radius:20px;
+  box-shadow:var(--shadow-sm);
+  padding:6px 14px; display:flex; align-items:center; gap:6px;
+  font-size:0.75rem; color:var(--text-sec); font-weight:500;
+  border:1px solid rgba(0,0,0,0.06);
+  cursor:pointer; transition:box-shadow 0.15s;
+}
+.legend-pill:hover { box-shadow:var(--shadow-md); }
+.lpill-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ── TOOLTIP ── */
+#tooltip {
+  position:absolute; z-index:60;
+  background:#202124; color:#fff;
+  font-size:0.78rem; font-weight:500;
+  padding:5px 10px; border-radius:6px;
+  pointer-events:none; white-space:nowrap;
+  box-shadow:var(--shadow-md);
+  opacity:0; transition:opacity 0.15s;
+  transform:translate(-50%,-100%);
+  margin-top:-8px;
+}
+#tooltip.show { opacity:1; }
+#tooltip::after {
+  content:''; position:absolute;
+  top:100%; left:50%; transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:#202124;
+}
+</style>
+</head>
+<body>
+
+<canvas id="mapCanvas"></canvas>
+
+<!-- Google Maps style search bar -->
+<div id="searchBar">
+  <div class="search-icon">📍</div>
+  <div class="search-text">Harsh Sahu — Career Map</div>
+  <div class="search-divider"></div>
+  <div class="search-avatar">HS</div>
+</div>
+
+<!-- Info card panel -->
+<div id="leftPanel">
+  <div id="cardHeader">
+    <div id="cardColorBar"></div>
+    <span id="cardEmoji">📍</span>
+    <div id="cardTitle">Location</div>
+    <div id="cardMeta"></div>
+    <button id="cardClose">✕</button>
+  </div>
+  <div id="cardActions">
+    <div class="action-btn"><span class="btn-icon">🗺️</span><span class="btn-label">Directions</span></div>
+    <div class="action-btn"><span class="btn-icon">💾</span><span class="btn-label">Save</span></div>
+    <div class="action-btn"><span class="btn-icon">📤</span><span class="btn-label">Share</span></div>
+    <div class="action-btn"><span class="btn-icon">📋</span><span class="btn-label">Details</span></div>
+  </div>
+  <div id="cardBody"></div>
+</div>
+
+<!-- Zoom controls -->
+<div id="zoomCtrl">
+  <button class="zoom-btn" id="zoomIn">+</button>
+  <button class="zoom-btn" id="zoomOut">−</button>
+</div>
+
+<!-- Scale bar -->
+<div id="scaleBar">
+  <div class="scale-line"></div>
+  <div class="scale-text">500m</div>
+</div>
+
+<!-- Layer button -->
+<button id="layerBtn" title="Layers">🗂️</button>
+
+<!-- Bottom legend pills -->
+<div id="bottomBar">
+  <div class="legend-pill"><div class="lpill-dot" style="background:#ea4335"></div>Experience</div>
+  <div class="legend-pill"><div class="lpill-dot" style="background:#1a73e8"></div>Skills</div>
+  <div class="legend-pill"><div class="lpill-dot" style="background:#9c27b0"></div>Projects</div>
+  <div class="legend-pill"><div class="lpill-dot" style="background:#34a853"></div>Education</div>
+  <div class="legend-pill"><div class="lpill-dot" style="background:#fa7b17"></div>About</div>
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CANVAS & STATE
+// ══════════════════════════════════════════════════
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+// Camera
+let camX = 0, camY = 0, camZ = 1.0;
+const MIN_Z = 0.4, MAX_Z = 3.5;
+
+// Drag state
+let drag = { active:false, sx:0, sy:0, cx:0, cy:0, moved:false };
+
+// Animation
+let rafId, pulse = 0, lastTs = 0;
+let mapCache = null; // pre-rendered tile
+
+// ══════════════════════════════════════════════════
+//  MAP DIMENSIONS
+// ══════════════════════════════════════════════════
+const MW = 2200, MH = 1500;
+
+// ══════════════════════════════════════════════════
+//  LOCATIONS
+// ══════════════════════════════════════════════════
+const LOCS = [
+  // ── EXPERIENCE DISTRICT (west cluster) ──
+  {
+    id:'deloitte', x:420, y:480,
+    label:'Deloitte USI', sublabel:'Consultant · Current',
+    color:'#ea4335', emoji:'🏛️', zone:'exp',
+    rating: 5.0, reviews: 'Current Role',
+    card:{
+      title:'Deloitte USI', emoji:'🏛️',
+      meta:['Consultant','Bengaluru','Jun 2025 – Present 🟢'],
+      color:'#ea4335',
+      render: ()=> `
+        <div class="info-section">
+          <div class="section-head">Experience</div>
+          <div class="exp-row">
+            <div class="exp-logo" style="background:#fce8e6">🏛️</div>
+            <div class="exp-info">
+              <div class="exp-company">Deloitte USI</div>
+              <div class="exp-role">Consultant — Banking & Risk</div>
+              <div class="exp-date">Jun 2025 – Present 🟢 Current</div>
+              <ul class="exp-bullets">
+                <li>Led migration of Risk & Fraud verification services replacing third-party vendor with .NET Web API architecture.</li>
+                <li>Built end-to-end simulator for vendor mock flows — enabled QA to run full regression without live APIs.</li>
+                <li>Delivered SQL stored procedures for core banking: transactions, accounts & compliance.</li>
+                <li>Ensured secure handling of sensitive data in fraud detection workflows.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Tech Stack</div>
+          <div class="tag-wrap">
+            ${['.NET Web API','C#','SQL Server','Stored Procedures','Fraud Detection','REST'].map(t=>`<span class="gtag gtag-red">${t}</span>`).join('')}
+          </div>
+        </div>
+      `
+    }
+  },
+  {
+    id:'ust', x:560, y:620,
+    label:'UST Global', sublabel:'Software Engineer',
+    color:'#ea4335', emoji:'⚙️', zone:'exp',
+    rating: 4.2, reviews: 'Mar 2024 – Jun 2025',
+    card:{
+      title:'UST Global', emoji:'⚙️',
+      meta:['Software Engineer','Bengaluru','Mar 2024 – Jun 2025'],
+      color:'#1a73e8',
+      render: ()=> `
+        <div class="info-section">
+          <div class="section-head">Experience</div>
+          <div class="exp-row">
+            <div class="exp-logo" style="background:#e8f0fe">⚙️</div>
+            <div class="exp-info">
+              <div class="exp-company">UST Global</div>
+              <div class="exp-role">Software Engineer — Dell Technologies</div>
+              <div class="exp-date">March 2024 – June 2025</div>
+              <ul class="exp-bullets">
+                <li>Developed .NET Core Web API to enhance MVC application performance.</li>
+                <li>Diagnosed and resolved critical MVC application defects.</li>
+                <li>Designed Web API to retrieve data from third-party apps, improving data-fetch speed.</li>
+                <li>Delivered scalable solutions meeting business objectives within deadlines.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Tech Stack</div>
+          <div class="tag-wrap">
+            ${['.NET Core','Web API','MVC','C#','REST','SQL','Performance'].map(t=>`<span class="gtag gtag-blue">${t}</span>`).join('')}
+          </div>
+        </div>
+      `
+    }
+  },
+  {
+    id:'siemens', x:370, y:680,
+    label:'Siemens Technology', sublabel:'Software Engineer',
+    color:'#ea4335', emoji:'🔬', zone:'exp',
+    rating: 4.6, reviews: 'Oct 2021 – Mar 2024',
+    card:{
+      title:'Siemens Technology', emoji:'🔬',
+      meta:['Software Engineer','Bengaluru','Oct 2021 – Mar 2024'],
+      color:'#009688',
+      render: ()=> `
+        <div class="info-section">
+          <div class="section-head">Experience</div>
+          <div class="exp-row">
+            <div class="exp-logo" style="background:#e6f4f1">🔬</div>
+            <div class="exp-info">
+              <div class="exp-company">Siemens Technology</div>
+              <div class="exp-role">Software Engineer — 2.5 Years</div>
+              <div class="exp-date">October 2021 – March 2024</div>
+              <ul class="exp-bullets">
+                <li>Spearheaded Angular UI development — high-performance, user-friendly interfaces.</li>
+                <li>Built WPF/C# MVVM tool to extract critical data from external applications.</li>
+                <li>Led SaaS Docker POC for Windows Application (Angular + .NET).</li>
+                <li>Led code reviews, enforced best practices, promoted modularity.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Tech Stack</div>
+          <div class="tag-wrap">
+            ${['Angular','TypeScript','WPF','C#','MVVM','Docker','SaaS','XAML'].map(t=>`<span class="gtag gtag-teal">${t}</span>`).join('')}
+          </div>
+        </div>
+      `
+    }
+  },
+  {
+    id:'infosys', x:510, y:780,
+    label:'Infosys', sublabel:'System Engineer',
+    color:'#ea4335', emoji:'🌿', zone:'exp',
+    rating: 4.0, reviews: 'Jan 2021 – Oct 2021',
+    card:{
+      title:'Infosys Limited', emoji:'🌿',
+      meta:['System Engineer','Pune','Jan 2021 – Oct 2021'],
+      color:'#34a853',
+      render: ()=> `
+        <div class="info-section">
+          <div class="section-head">Experience</div>
+          <div class="exp-row">
+            <div class="exp-logo" style="background:#e6f4ea">🌿</div>
+            <div class="exp-info">
+              <div class="exp-company">Infosys Limited</div>
+              <div class="exp-role">System Engineer — Pune</div>
+              <div class="exp-date">January 2021 – October 2021</div>
+              <ul class="exp-bullets">
+                <li>Oracle EBS 10g support for critical business operations.</li>
+                <li>Developed complex PL/SQL workflows for automation.</li>
+                <li>Managed Workforce via Kronos application.</li>
+                <li>Resolved client tickets consistently within SLA.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Tech Stack</div>
+          <div class="tag-wrap">
+            ${['Oracle EBS','PL/SQL','Kronos','SQL','Client Support','Workforce'].map(t=>`<span class="gtag gtag-green">${t}</span>`).join('')}
+          </div>
+        </div>
+      `
+    }
+  },
+
+  // ── SKILLS DISTRICT (east) ──
+  {
+    id:'skills', x:1620, y:480,
+    label:'Skills Citadel', sublabel:'Arsenal',
+    color:'#1a73e8', emoji:'⚗️', zone:'skills',
+    rating: 4.9, reviews: '20+ technologies',
+    card:{
+      title:'Skills & Technologies', emoji:'💻',
+      meta:['Full Stack','Frontend + Backend','5+ Years'],
+      color:'#1a73e8',
+      render: ()=>`
+        <div class="info-section">
+          <div class="section-head">Frontend</div>
+          <div class="tag-wrap">
+            ${['Angular','TypeScript','HTML5','CSS3','RxJS','XAML','WPF'].map(t=>`<span class="gtag gtag-blue">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Backend</div>
+          <div class="tag-wrap">
+            ${['.NET','C#','Web API','Dapper','Entity Framework','REST','MVC'].map(t=>`<span class="gtag gtag-red">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Database & Cloud</div>
+          <div class="tag-wrap">
+            ${['SQL Server','SSMS','Oracle EBS','PL/SQL','Docker'].map(t=>`<span class="gtag gtag-teal">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Tools</div>
+          <div class="tag-wrap">
+            ${['Git','Visual Studio','VS Code','JIRA','TFS','Python'].map(t=>`<span class="gtag gtag-orange">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Principles</div>
+          <div class="tag-wrap">
+            ${['Design Patterns','OOPs','MVVM','SOLID','Agile','Problem Solving','Ownership'].map(t=>`<span class="gtag gtag-purple">${t}</span>`).join('')}
+          </div>
+        </div>
+      `
+    }
+  },
+
+  // ── PROJECTS DISTRICT (south-east) ──
+  {
+    id:'projects', x:1550, y:1050,
+    label:'Projects Hub', sublabel:'5 Delivered',
+    color:'#9c27b0', emoji:'📋', zone:'projects',
+    rating: 4.8, reviews: '5 major projects',
+    card:{
+      title:'Project Portfolio', emoji:'🗂️',
+      meta:['5 Projects','4 Companies','2021 – Present'],
+      color:'#9c27b0',
+      render: ()=>`
+        <div class="info-section">
+          <div class="section-head">Projects</div>
+          <div class="proj-item">
+            <div class="proj-icon">🔐</div>
+            <div>
+              <div class="proj-name">Risk & Fraud Verification System</div>
+              <div class="proj-co">Deloitte USI</div>
+              <div class="proj-desc">Vendor migration, .NET Web API, test simulator, core banking SQL.</div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-icon">🖥️</div>
+            <div>
+              <div class="proj-name">Dell Licensing Online</div>
+              <div class="proj-co">UST Global — Dell Technologies</div>
+              <div class="proj-desc">.NET Core Web API, MVC optimization, third-party data API.</div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-icon">🏭</div>
+            <div>
+              <div class="proj-name">SIMATIC Project Insight</div>
+              <div class="proj-co">Siemens Technology</div>
+              <div class="proj-desc">Angular UI, WPF/C# MVVM tool, SaaS Docker POC.</div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-icon">🧪</div>
+            <div>
+              <div class="proj-name">SIMATIC Sipat</div>
+              <div class="proj-co">Siemens Technology</div>
+              <div class="proj-desc">Enterprise Angular web app with high-performance UI components.</div>
+            </div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-icon">👥</div>
+            <div>
+              <div class="proj-name">Workforce Management</div>
+              <div class="proj-co">Infosys — Oracle EBS + Kronos</div>
+              <div class="proj-desc">Oracle EBS 10g, PL/SQL workflows, Kronos management.</div>
+            </div>
+          </div>
+        </div>
+      `
+    }
+  },
+
+  // ── EDUCATION DISTRICT (south-west) ──
+  {
+    id:'education', x:520, y:1100,
+    label:'Academy of CS', sublabel:'OIST Bhopal',
+    color:'#34a853', emoji:'🎓', zone:'education',
+    rating: 4.5, reviews: 'Class of 2020',
+    card:{
+      title:'Education', emoji:'🎓',
+      meta:['B.E. Computer Science','OIST Bhopal','2016 – 2020'],
+      color:'#34a853',
+      render: ()=>`
+        <div class="info-section">
+          <div class="section-head">Degree</div>
+          <div class="exp-row">
+            <div class="exp-logo" style="background:#e6f4ea;font-size:1.5rem">🏫</div>
+            <div class="exp-info">
+              <div class="exp-company">Oriental Institute of Science & Technology</div>
+              <div class="exp-role">B.E. in Computer Science Engineering</div>
+              <div class="exp-date">📍 Bhopal, India · 2016 – 2020</div>
+            </div>
+          </div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Core Subjects</div>
+          <div class="tag-wrap">
+            ${['Algorithms','Data Structures','OOPs','DBMS','OS','Software Engineering','Networks'].map(t=>`<span class="gtag gtag-green">${t}</span>`).join('')}
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-val">4</div><div class="stat-lbl">Years</div></div>
+          <div class="stat-card"><div class="stat-val">CS</div><div class="stat-lbl">Branch</div></div>
+          <div class="stat-card"><div class="stat-val">2020</div><div class="stat-lbl">Graduated</div></div>
+        </div>
+      `
+    }
+  },
+
+  // ── ABOUT / HUB (centre) ──
+  {
+    id:'about', x:1050, y:760,
+    label:"Harsh's HQ", sublabel:'Software Engineer',
+    color:'#fa7b17', emoji:'🏠', zone:'about', isHub:true,
+    rating: 5.0, reviews: 'Open to opportunities',
+    card:{
+      title:"Harsh Sahu", emoji:'👨‍💻',
+      meta:['Software Engineer','Bengaluru, India','5+ Years'],
+      color:'#fa7b17',
+      render: ()=>`
+        <div class="info-section">
+          <div class="section-head">Profile</div>
+          <p style="font-size:.88rem;color:#3c4043;line-height:1.65;padding:8px 10px;background:#fef3e2;border-radius:8px;border-left:3px solid #fa7b17">
+            Motivated and results-driven Software Engineer delivering high-quality UI and full-stack solutions. 
+            Proven track record across Deloitte, Siemens, Dell and Infosys.
+          </p>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-val">5+</div><div class="stat-lbl">Years Exp</div></div>
+          <div class="stat-card"><div class="stat-val">4</div><div class="stat-lbl">Companies</div></div>
+          <div class="stat-card"><div class="stat-val">5</div><div class="stat-lbl">Projects</div></div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Languages</div>
+          <div class="lang-row"><span class="lang-name">🇬🇧 English</span><div class="lang-bar"><div class="lang-fill" style="width:95%"></div></div></div>
+          <div class="lang-row"><span class="lang-name">🇮🇳 Hindi</span><div class="lang-bar"><div class="lang-fill" style="width:100%"></div></div></div>
+        </div>
+        <div class="info-section">
+          <div class="section-head">Hobbies</div>
+          <div class="hobby-row">
+            ${[['🏊','Swimming'],['🏸','Badminton'],['🚗','Road Trips'],['🎬','Movies'],['💪','Fitness'],['🧗','Adventure']].map(([e,l])=>`<div class="h-chip">${e} ${l}</div>`).join('')}
+          </div>
+        </div>
+      `
+    }
+  },
+];
+
+// ══════════════════════════════════════════════════
+//  RESIZE
+// ══════════════════════════════════════════════════
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  // Centre map
+  if (!mapCache) {
+    camX = (W - MW) / 2 + 100;
+    camY = (H - MH) / 2 + 50;
+  }
+}
+window.addEventListener('resize', () => { resize(); mapCache = null; });
+
+// ══════════════════════════════════════════════════
+//  PRE-RENDER STATIC MAP
+// ══════════════════════════════════════════════════
+function buildMapCache() {
+  const off = document.createElement('canvas');
+  off.width = MW; off.height = MH;
+  const c = off.getContext('2d');
+  renderStaticMap(c);
+  mapCache = off;
+}
+
+function renderStaticMap(c) {
+  // ── BASE LAND ──
+  const landG = c.createLinearGradient(0,0,MW,MH);
+  landG.addColorStop(0,  '#f5f0e8');
+  landG.addColorStop(0.3,'#f0ebe0');
+  landG.addColorStop(0.6,'#ece7db');
+  landG.addColorStop(1,  '#e8e3d8');
+  c.fillStyle = landG;
+  c.fillRect(0, 0, MW, MH);
+
+  // ── SUBTLE LAND TEXTURE ──
+  for (let y=0;y<MH;y+=2) {
+    for (let x=0;x<MW;x+=2) {
+      const n = sNoise(x*0.008,y*0.008);
+      if (n > 0.6) { c.fillStyle=`rgba(0,0,0,${(n-0.6)*0.08})`; c.fillRect(x,y,2,2); }
+    }
+  }
+
+  // ── WATER BODIES ──
+  drawWater(c);
+
+  // ── PARKS / GREEN ZONES ──
+  drawParks(c);
+
+  // ── BUILDINGS / BLOCKS ──
+  drawBuildings(c);
+
+  // ── ROAD NETWORK ──
+  drawRoads(c);
+
+  // ── DISTRICT OVERLAYS ──
+  drawDistrictOverlays(c);
+
+  // ── DISTRICT LABELS ──
+  drawDistrictLabels(c);
+}
+
+// ── WATER ──
+function drawWater(c) {
+  // Main river (horizontal through centre-ish)
+  c.save();
+  c.strokeStyle='#aad3df'; c.lineWidth=28;
+  c.lineCap='round'; c.lineJoin='round';
+  c.beginPath();
+  c.moveTo(0,680);
+  c.bezierCurveTo(200,660, 400,700, 600,690);
+  c.bezierCurveTo(800,680, 1000,720, 1200,710);
+  c.bezierCurveTo(1400,700, 1600,680, 1800,670);
+  c.lineTo(MW,670);
+  c.stroke();
+  // River detail lines
+  c.strokeStyle='#95c8d8'; c.lineWidth=1.5;
+  c.beginPath();
+  c.moveTo(0,675); c.bezierCurveTo(200,655,400,695,600,685);
+  c.bezierCurveTo(800,675,1000,715,1200,705);
+  c.bezierCurveTo(1400,695,1600,675,MW,665);
+  c.stroke();
+  c.restore();
+
+  // North lake
+  c.save();
+  c.beginPath(); c.ellipse(1100,200,200,90,0.1,0,Math.PI*2);
+  c.fillStyle='#aad3df'; c.fill();
+  c.strokeStyle='#7ab8cc'; c.lineWidth=2; c.stroke();
+  // Lake shimmer
+  c.strokeStyle='rgba(255,255,255,0.4)'; c.lineWidth=1.5;
+  c.beginPath(); c.ellipse(1080,190,80,25,0.2,0,Math.PI*2); c.stroke();
+  c.restore();
+
+  // Small pond near education
+  c.beginPath(); c.ellipse(680,1150,70,35,0.15,0,Math.PI*2);
+  c.fillStyle='#aad3df'; c.fill();
+  c.strokeStyle='#7ab8cc'; c.lineWidth=1.5; c.stroke();
+
+  // South bay
+  c.beginPath();
+  c.moveTo(0,MH); c.lineTo(0,1280);
+  c.bezierCurveTo(100,1260,300,1320,500,1300);
+  c.bezierCurveTo(700,1280,900,1350,1100,1340);
+  c.lineTo(1100,MH); c.closePath();
+  c.fillStyle='#aad3df'; c.fill();
+
+  // Water text
+  c.fillStyle='#5d8598'; c.font='italic 13px Roboto';
+  c.textAlign='center';
+  c.fillText('Career River', 900, 700);
+  c.fillText('Knowledge Lake', 1100, 210);
+}
+
+// ── PARKS ──
+function drawParks(c) {
+  const parks = [
+    // Experience district park
+    { x:200,y:350, w:180,h:100, label:'Experience Park' },
+    // Skills area park
+    { x:1450,y:300, w:220,h:120, label:'Skills Garden' },
+    // Central park
+    { x:880,y:520, w:160,h:110, label:'Central Park' },
+    // Education area
+    { x:350,y:980, w:140,h:80, label:'Academy Green' },
+    // Projects park
+    { x:1400,y:880, w:150,h:90, label:'Project Grove' },
+  ];
+
+  for (const p of parks) {
+    // Park fill
+    c.fillStyle='#c8e6c0';
+    c.beginPath(); c.roundRect(p.x,p.y,p.w,p.h,8); c.fill();
+    // Park border
+    c.strokeStyle='#a5d6a7'; c.lineWidth=1.5;
+    c.beginPath(); c.roundRect(p.x,p.y,p.w,p.h,8); c.stroke();
+    // Tree dots
+    const seed = p.x + p.y;
+    for (let i=0;i<8;i++) {
+      const tx=p.x+15+((seed*i*137)%((p.w-30)|1));
+      const ty=p.y+12+((seed*i*97)%((p.h-24)|1));
+      c.beginPath(); c.arc(tx,ty,5,0,Math.PI*2);
+      c.fillStyle='#81c784'; c.fill();
+      c.beginPath(); c.arc(tx,ty,3,0,Math.PI*2);
+      c.fillStyle='#4caf50'; c.fill();
+    }
+    // Park label
+    c.fillStyle='rgba(46,125,50,0.7)'; c.font='italic 10px Roboto';
+    c.textAlign='center';
+    c.fillText(p.label, p.x+p.w/2, p.y+p.h-8);
+  }
+}
+
+// ── BUILDINGS ──
+function drawBuildings(c) {
+  // Dense building grid in various districts
+  const zones = [
+    { cx:430, cy:600, r:160, density:18, col1:'#e8e0d0', col2:'#d8cfc0' }, // exp
+    { cx:1620,cy:520, r:140, density:15, col1:'#dce8f0', col2:'#ccd8e0' }, // skills
+    { cx:1560,cy:1050,r:120, density:14, col1:'#ede0f0', col2:'#ddd0e0' }, // projects
+    { cx:530, cy:1080,r:110, density:12, col1:'#ddf0e4', col2:'#cde0d4' }, // education
+    { cx:1050,cy:760, r:130, density:16, col1:'#fff0e0', col2:'#f0e0d0' }, // hub
+  ];
+
+  const rng = mulberry32(42);
+
+  for (const zone of zones) {
+    for (let i=0;i<zone.density;i++) {
+      const angle = rng()*Math.PI*2;
+      const dist  = rng()*zone.r*0.85;
+      const bx = zone.cx + Math.cos(angle)*dist;
+      const by = zone.cy + Math.sin(angle)*dist;
+      const bw = 18 + rng()*30;
+      const bh = 14 + rng()*22;
+
+      c.fillStyle = rng()<0.5 ? zone.col1 : zone.col2;
+      c.beginPath(); c.roundRect(bx-bw/2,by-bh/2,bw,bh,2); c.fill();
+      c.strokeStyle='rgba(0,0,0,0.08)'; c.lineWidth=0.8;
+      c.beginPath(); c.roundRect(bx-bw/2,by-bh/2,bw,bh,2); c.stroke();
+    }
+  }
+
+  // Dense city area (centre-right)
+  for (let i=0;i<40;i++) {
+    const rng2 = mulberry32(i*77+999);
+    const bx=900+rng2()*400, by=780+rng2()*200;
+    const bw=22+rng2()*35, bh=16+rng2()*28;
+    c.fillStyle=`rgba(220,210,195,${0.6+rng2()*0.3})`;
+    c.beginPath(); c.roundRect(bx,by,bw,bh,2); c.fill();
+    c.strokeStyle='rgba(0,0,0,0.06)'; c.lineWidth=0.8;
+    c.beginPath(); c.roundRect(bx,by,bw,bh,2); c.stroke();
+  }
+}
+
+// ── ROADS ──
+function drawRoads(c) {
+  // Road data: [type, points array]
+  // Types: 'highway'|'major'|'secondary'|'local'
+  const roads = [
+    // Highways (orange/yellow freeways)
+    { type:'highway', pts:[[0,480],[300,490],[600,500],[900,510],[1200,500],[1500,490],[MW,480]] },
+    { type:'highway', pts:[[0,980],[300,990],[600,1000],[900,990],[1200,985],[1500,975],[MW,970]] },
+    // Major roads (wide white)
+    { type:'major', pts:[[260,0],[280,200],[290,480],[300,700],[310,950],[320,1200],[330,MH]] },
+    { type:'major', pts:[[820,0],[830,200],[840,500],[850,760],[860,1050],[870,MH]] },
+    { type:'major', pts:[[1350,0],[1360,200],[1370,500],[1380,750],[1390,1050],[1400,MH]] },
+    { type:'major', pts:[[0,240],[300,240],[600,240],[900,240],[1200,250],[1500,260],[MW,270]] },
+    { type:'major', pts:[[0,1200],[300,1190],[700,1185],[1050,1185],[1400,1190],[MW,1200]] },
+    // Secondary roads
+    { type:'secondary', pts:[[420,300],[430,480],[440,680],[450,900]] },
+    { type:'secondary', pts:[[550,400],[560,600],[570,800],[580,1100]] },
+    { type:'secondary', pts:[[1050,400],[1060,550],[1060,760],[1070,950]] },
+    { type:'secondary', pts:[[1550,350],[1560,520],[1570,750],[1580,1050]] },
+    { type:'secondary', pts:[[700,250],[710,500],[720,750],[730,1000]] },
+    { type:'secondary', pts:[[0,750],[300,740],[600,730],[900,720],[1200,715],[MW,710]] },
+    // Local roads (many)
+    { type:'local', pts:[[350,480],[420,480],[560,480]] },
+    { type:'local', pts:[[370,680],[500,680],[620,680]] },
+    { type:'local', pts:[[430,780],[560,780]] },
+    { type:'local', pts:[[1600,480],[1650,480],[1700,480]] },
+    { type:'local', pts:[[1520,900],[1600,900],[1700,900]] },
+    { type:'local', pts:[[500,1100],[600,1100],[700,1100]] },
+    { type:'local', pts:[[1000,760],[1100,760],[1200,760]] },
+    { type:'local', pts:[[400,580],[420,680],[440,780]] },
+    { type:'local', pts:[[540,580],[560,680],[580,780]] },
+    // Connector roads between zones
+    { type:'secondary', pts:[[420,480],[700,690],[1050,760]] },
+    { type:'secondary', pts:[[1050,760],[1350,900],[1560,1050]] },
+    { type:'secondary', pts:[[1050,760],[1380,500],[1620,480]] },
+    { type:'secondary', pts:[[530,1100],[780,1000],[1050,760]] },
+    { type:'local', pts:[[420,480],[520,690]] },
+    { type:'local', pts:[[520,690],[510,780]] },
+    { type:'local', pts:[[370,680],[510,780]] },
+  ];
+
+  const roadStyles = {
+    highway:   { strokeW:14, stroke:'#f5d66b', lineW:12, line:'#f9e090', casingW:16, casing:'#e8b800' },
+    major:     { strokeW:8,  stroke:'#e0d8c8', lineW:6,  line:'#ffffff',  casingW:9,  casing:'#d0c8b8' },
+    secondary: { strokeW:5,  stroke:'#e0d8c8', lineW:3.5,line:'#fafafa',  casingW:6,  casing:'#d0c8b8' },
+    local:     { strokeW:3,  stroke:'#e0d8c8', lineW:2,  line:'#ffffff',  casingW:3.5,casing:'#d0c8b8' },
+  };
+
+  // Draw casings first (layered like real tiles)
+  for (const order of ['local','secondary','major','highway']) {
+    const st = roadStyles[order];
+    for (const road of roads.filter(r=>r.type===order)) {
+      c.beginPath();
+      c.moveTo(road.pts[0][0], road.pts[0][1]);
+      if (road.pts.length > 2) {
+        for (let i=1;i<road.pts.length-1;i++) {
+          const mx=(road.pts[i][0]+road.pts[i+1][0])/2;
+          const my=(road.pts[i][1]+road.pts[i+1][1])/2;
+          c.quadraticCurveTo(road.pts[i][0],road.pts[i][1],mx,my);
+        }
+        c.lineTo(road.pts[road.pts.length-1][0],road.pts[road.pts.length-1][1]);
+      } else { c.lineTo(road.pts[1][0],road.pts[1][1]); }
+      c.strokeStyle=st.casing; c.lineWidth=st.casingW; c.lineCap='round'; c.lineJoin='round'; c.stroke();
+    }
+  }
+
+  // Then draw fill
+  for (const order of ['local','secondary','major','highway']) {
+    const st = roadStyles[order];
+    for (const road of roads.filter(r=>r.type===order)) {
+      c.beginPath();
+      c.moveTo(road.pts[0][0], road.pts[0][1]);
+      if (road.pts.length > 2) {
+        for (let i=1;i<road.pts.length-1;i++) {
+          const mx=(road.pts[i][0]+road.pts[i+1][0])/2;
+          const my=(road.pts[i][1]+road.pts[i+1][1])/2;
+          c.quadraticCurveTo(road.pts[i][0],road.pts[i][1],mx,my);
+        }
+        c.lineTo(road.pts[road.pts.length-1][0],road.pts[road.pts.length-1][1]);
+      } else { c.lineTo(road.pts[1][0],road.pts[1][1]); }
+      c.strokeStyle=st.line; c.lineWidth=st.lineW; c.lineCap='round'; c.lineJoin='round'; c.stroke();
+    }
+  }
+
+  // Highway labels
+  c.fillStyle='rgba(160,120,0,0.7)'; c.font='bold 10px Roboto';
+  c.textAlign='center';
+  const hwPts=[[500,474],[900,504],[1300,494]];
+  for(const [hx,hy] of hwPts){
+    c.fillStyle='#f5d66b'; c.strokeStyle='#e8a800';
+    c.lineWidth=1; c.font='bold 9px Roboto';
+    c.beginPath(); c.roundRect(hx-14,hy-8,28,14,3); c.fill(); c.stroke();
+    c.fillStyle='#333'; c.fillText('NH-1',hx,hy+2);
+  }
+}
+
+// ── DISTRICT OVERLAYS ──
+function drawDistrictOverlays(c) {
+  const overlays = [
+    { cx:430,  cy:610,  r:220, color:'rgba(234,67,53,0.07)',  border:'rgba(234,67,53,0.2)'  },
+    { cx:1620, cy:490,  r:200, color:'rgba(26,115,232,0.07)', border:'rgba(26,115,232,0.2)' },
+    { cx:1550, cy:1060, r:180, color:'rgba(156,39,176,0.07)', border:'rgba(156,39,176,0.2)' },
+    { cx:530,  cy:1080, r:160, color:'rgba(52,168,83,0.08)',  border:'rgba(52,168,83,0.2)'  },
+    { cx:1050, cy:760,  r:170, color:'rgba(250,123,23,0.08)', border:'rgba(250,123,23,0.2)' },
+  ];
+  for (const o of overlays) {
+    const grd = c.createRadialGradient(o.cx,o.cy,0,o.cx,o.cy,o.r);
+    grd.addColorStop(0, o.color);
+    grd.addColorStop(0.7, o.color);
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle=grd;
+    c.beginPath(); c.arc(o.cx,o.cy,o.r,0,Math.PI*2); c.fill();
+  }
+}
+
+// ── DISTRICT LABELS ──
+function drawDistrictLabels(c) {
+  const labels = [
+    { x:440,  y:310,  text:'EXPERIENCE QUARTER',  sub:'Work History',         col:'#c0392b' },
+    { x:1620, y:320,  text:'SKILLS CITADEL',       sub:'Technologies',         col:'#1557a0' },
+    { x:1570, y:870,  text:'PROJECTS SANCTUM',     sub:'Delivered Work',       col:'#6a1b9a' },
+    { x:520,  y:940,  text:'ACADEMY ISLE',         sub:'Education',            col:'#1b5e20' },
+    { x:1050, y:590,  text:"HARSH'S HQ",           sub:'About & Profile',      col:'#b84400' },
+    { x:1100, y:160,  text:'KNOWLEDGE LAKE',       sub:'',                     col:'#5d8598' },
+  ];
+  for (const l of labels) {
+    c.textAlign='center';
+    c.font=`700 12px "Roboto"`;
+    c.fillStyle=l.col;
+    c.globalAlpha=0.55;
+    c.fillText(l.text.toUpperCase(), l.x, l.y);
+    if (l.sub) {
+      c.font='400 10px Roboto';
+      c.fillStyle=l.col;
+      c.fillText(l.sub, l.x, l.y+14);
+    }
+    c.globalAlpha=1;
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  MARKER DRAWING (animated, on top)
+// ══════════════════════════════════════════════════
+const ZONE_COLORS = { exp:'#ea4335', skills:'#1a73e8', projects:'#9c27b0', education:'#34a853', about:'#fa7b17' };
+
+function drawMarkers() {
+  for (const loc of LOCS) {
+    const isHov = hoveredId === loc.id;
+    const isHub = loc.isHub;
+    const col = loc.color;
+    const p = 0.5 + Math.sin(pulse*1.8 + loc.x*0.005)*0.5; // 0..1
+    const lx = loc.x, ly = loc.y;
+
+    if (isHub) {
+      // Hub marker — larger star pin
+      drawHubPin(lx, ly, col, isHov, p);
+    } else {
+      drawPin(lx, ly, col, loc.emoji, isHov, p);
+    }
+
+    // Label bubble (Google Maps style)
+    if (isHov || isHub) {
+      drawLabel(lx, ly - (isHub?54:46), loc.label, col, isHov);
+    }
+  }
+}
+
+function drawPin(x, y, col, emoji, hov, p) {
+  const scale = hov ? 1.15 : 1.0;
+  const h = 42 * scale;
+  const r = 14 * scale;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  // Drop shadow
+  ctx.shadowColor='rgba(0,0,0,0.28)'; ctx.shadowBlur=8; ctx.shadowOffsetY=3;
+
+  // Pin body (teardrop)
+  ctx.beginPath();
+  ctx.arc(0, -h+r, r, 0, Math.PI*2);
+  ctx.moveTo(-r, -h+r);
+  ctx.lineTo(0, 0);
+  ctx.lineTo(r, -h+r);
+  ctx.arc(0, -h+r, r, 0, Math.PI);
+  ctx.closePath();
+
+  // Pin gradient fill
+  const pg = ctx.createLinearGradient(-r,-h,r,-h+r*2);
+  pg.addColorStop(0, lighten(col,20));
+  pg.addColorStop(1, darken(col,10));
+  ctx.fillStyle=pg; ctx.fill();
+
+  ctx.shadowColor='transparent';
+
+  // White border
+  ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.arc(0,-h+r,r,0,Math.PI*2); ctx.stroke();
+
+  // Emoji
+  ctx.font=`${r*1.2}px serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(emoji, 0, -h+r);
+
+  // Pulse ring
+  const pr = (r + 8 + p*16);
+  ctx.beginPath(); ctx.arc(0,-h+r,pr,0,Math.PI*2);
+  ctx.strokeStyle=`${col}${Math.floor((1-p)*0.6*255).toString(16).padStart(2,'0')}`;
+  ctx.lineWidth=1.5; ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawHubPin(x, y, col, hov, p) {
+  const scale = hov ? 1.2 : 1.05;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  // Big pulse glow
+  for (let i=2;i>=0;i--) {
+    const pr=(22+i*14)+p*10;
+    ctx.beginPath(); ctx.arc(0,-28,pr,0,Math.PI*2);
+    ctx.fillStyle=`${col}${Math.floor((0.12-i*0.03)*255).toString(16).padStart(2,'0')}`;
+    ctx.fill();
+  }
+
+  ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=10; ctx.shadowOffsetY=4;
+
+  // Outer circle
+  ctx.beginPath(); ctx.arc(0,-28,22,0,Math.PI*2);
+  ctx.fillStyle=col; ctx.fill();
+  ctx.shadowColor='transparent';
+  ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.stroke();
+
+  // Inner white dot
+  ctx.beginPath(); ctx.arc(0,-28,8,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.fill();
+
+  ctx.font='14px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🏠',0,-28);
+
+  ctx.restore();
+}
+
+function drawLabel(x, y, text, col, hov) {
+  ctx.save();
+  ctx.font=`${hov?'600':'500'} 11px "Google Sans",Roboto`;
+  const tw = ctx.measureText(text).width;
+  const pw=10, ph=8, br=4;
+  const bw=tw+pw*2, bh=18;
+
+  ctx.shadowColor='rgba(0,0,0,0.18)'; ctx.shadowBlur=6; ctx.shadowOffsetY=2;
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.roundRect(x-bw/2,y-bh/2,bw,bh,br); ctx.fill();
+  ctx.shadowColor='transparent';
+
+  ctx.strokeStyle=hov?col:'rgba(0,0,0,0.1)'; ctx.lineWidth=hov?1.5:0.8;
+  ctx.beginPath(); ctx.roundRect(x-bw/2,y-bh/2,bw,bh,br); ctx.stroke();
+
+  ctx.fillStyle=hov?col:'#3c4043';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════════════
+//  INTERACTION
+// ══════════════════════════════════════════════════
+let hoveredId = null;
+const tooltip = document.getElementById('tooltip');
+
+canvas.addEventListener('mousedown', e => {
+  drag.active=true; drag.moved=false;
+  drag.sx=e.clientX; drag.sy=e.clientY;
+  drag.cx=camX; drag.cy=camY;
+  canvas.classList.add('dragging');
+});
+
+window.addEventListener('mousemove', e => {
+  if (drag.active) {
+    const dx=e.clientX-drag.sx, dy=e.clientY-drag.sy;
+    if(Math.hypot(dx,dy)>3) drag.moved=true;
+    camX=drag.cx+dx; camY=drag.cy+dy;
+    return;
+  }
+  // Hover detection
+  const wx=(e.clientX-camX)/camZ, wy=(e.clientY-camY)/camZ;
+  let found=null;
+  for(const loc of LOCS){
+    const pinY=loc.y-(loc.isHub?28:28);
+    if(Math.hypot(wx-loc.x,wy-pinY)<20){ found=loc.id; break; }
+  }
+  if(found!==hoveredId){
+    hoveredId=found;
+    canvas.style.cursor=found?'pointer':(drag.active?'grabbing':'grab');
+    if(found){
+      const loc=LOCS.find(l=>l.id===found);
+      tooltip.textContent=`${loc.emoji} ${loc.label} · ${loc.sublabel}`;
+      tooltip.style.left=e.clientX+'px';
+      tooltip.style.top=(e.clientY-50)+'px';
+      tooltip.classList.add('show');
+    } else {
+      tooltip.classList.remove('show');
+    }
+  } else if(found) {
+    tooltip.style.left=e.clientX+'px';
+    tooltip.style.top=(e.clientY-50)+'px';
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  drag.active=false;
+  canvas.classList.remove('dragging');
+  canvas.style.cursor=hoveredId?'pointer':'grab';
+});
+
+canvas.addEventListener('click', e => {
+  if(drag.moved) return;
+  const wx=(e.clientX-camX)/camZ, wy=(e.clientY-camY)/camZ;
+  for(const loc of LOCS){
+    if(Math.hypot(wx-loc.x,wy-loc.y)<30){
+      openCard(loc); return;
+    }
+  }
+  closeCard();
+});
+
+// Scroll zoom
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const factor=e.deltaY<0?1.1:0.92;
+  const nz=Math.max(MIN_Z,Math.min(MAX_Z,camZ*factor));
+  camX=e.clientX-(e.clientX-camX)*(nz/camZ);
+  camY=e.clientY-(e.clientY-camY)*(nz/camZ);
+  camZ=nz;
+},{passive:false});
+
+// Zoom buttons
+document.getElementById('zoomIn').addEventListener('click',()=>{
+  const nz=Math.min(MAX_Z,camZ*1.2);
+  camX=W/2-(W/2-camX)*(nz/camZ); camY=H/2-(H/2-camY)*(nz/camZ); camZ=nz;
+});
+document.getElementById('zoomOut').addEventListener('click',()=>{
+  const nz=Math.max(MIN_Z,camZ*0.85);
+  camX=W/2-(W/2-camX)*(nz/camZ); camY=H/2-(H/2-camY)*(nz/camZ); camZ=nz;
+});
+
+// Touch
+let lastPinchDist=0;
+canvas.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){
+    drag.active=true; drag.moved=false;
+    drag.sx=e.touches[0].clientX; drag.sy=e.touches[0].clientY;
+    drag.cx=camX; drag.cy=camY;
+  } else {
+    drag.active=false;
+    lastPinchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  }
+},{passive:true});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(e.touches.length===1&&drag.active){
+    drag.moved=true;
+    camX=drag.cx+(e.touches[0].clientX-drag.sx);
+    camY=drag.cy+(e.touches[0].clientY-drag.sy);
+  } else if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    const nz=Math.max(MIN_Z,Math.min(MAX_Z,camZ*(d/lastPinchDist)));
+    const mx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+    const my=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    camX=mx-(mx-camX)*(nz/camZ); camY=my-(my-camY)*(nz/camZ); camZ=nz;
+    lastPinchDist=d;
+  }
+},{passive:false});
+canvas.addEventListener('touchend',()=>{ drag.active=false; });
+
+// ══════════════════════════════════════════════════
+//  CARD OPEN / CLOSE
+// ══════════════════════════════════════════════════
+function openCard(loc) {
+  const panel=document.getElementById('leftPanel');
+  const colorBar=document.getElementById('cardColorBar');
+  const emojiEl=document.getElementById('cardEmoji');
+  const titleEl=document.getElementById('cardTitle');
+  const metaEl=document.getElementById('cardMeta');
+  const bodyEl=document.getElementById('cardBody');
+
+  colorBar.style.background=loc.card.color;
+  emojiEl.textContent=loc.card.emoji;
+  titleEl.textContent=loc.card.title;
+  titleEl.style.color='#202124';
+
+  // Rating + meta chips
+  const stars='★'.repeat(Math.round(loc.rating));
+  metaEl.innerHTML=`
+    <span class="meta-chip" style="background:${loc.card.color}15;color:${loc.card.color}">${loc.card.meta[0]}</span>
+    <span class="meta-chip">${loc.card.meta[1]}</span>
+    <span style="color:#fbbc04;font-size:.9rem">${stars}</span>
+    <span style="color:#3c4043;font-size:.8rem">${loc.rating.toFixed(1)}</span>
+    <span style="color:var(--text-sec);font-size:.78rem">(${loc.reviews})</span>
+  `;
+
+  bodyEl.innerHTML=loc.card.render();
+
+  panel.classList.remove('open');
+  void panel.offsetWidth;
+  panel.classList.add('open');
+
+  // Pan to location
+  const tx=W*0.55-loc.x*camZ, ty=H/2-loc.y*camZ;
+  animatePan(tx,ty);
+}
+
+function closeCard() {
+  document.getElementById('leftPanel').classList.remove('open');
+}
+document.getElementById('cardClose').addEventListener('click',closeCard);
+
+// Smooth pan animation
+let panAnim=null;
+function animatePan(tx,ty){
+  if(panAnim) cancelAnimationFrame(panAnim);
+  const sx=camX,sy=camY;
+  let t=0;
+  function step(){
+    t+=0.06;
+    const e=1-Math.pow(1-Math.min(t,1),4);
+    camX=sx+(tx-sx)*e; camY=sy+(ty-sy)*e;
+    if(t<1) panAnim=requestAnimationFrame(step);
+  }
+  step();
+}
+
+// ══════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════
+function mulberry32(seed){
+  return()=>{ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; };
+}
+function sNoise(x,y){ let n=(x*374761393+y*668265263)|0; n=(n^n>>13)*1274126177; return((n^n>>16)&0xffff)/65535; }
+function lighten(hex,a){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgb(${Math.min(255,r+a)},${Math.min(255,g+a)},${Math.min(255,b+a)})`; }
+function darken(hex,a){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgb(${Math.max(0,r-a)},${Math.max(0,g-a)},${Math.max(0,b-a)})`; }
+
+// ══════════════════════════════════════════════════
+//  RENDER LOOP
+// ══════════════════════════════════════════════════
+function render(ts){
+  pulse+=(ts-lastTs)/1000; lastTs=ts;
+
+  // Background (water colour)
+  ctx.fillStyle='#aad3df';
+  ctx.fillRect(0,0,W,H);
+
+  // Draw map
+  ctx.save();
+  ctx.translate(camX,camY);
+  ctx.scale(camZ,camZ);
+  if(mapCache) ctx.drawImage(mapCache,0,0);
+  drawMarkers();
+  ctx.restore();
+
+  requestAnimationFrame(render);
+}
+
+// ══════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════
+resize();
+buildMapCache();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
